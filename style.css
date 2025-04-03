@@ -1,0 +1,94 @@
+body {
+    background-color: black;
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.container {
+    max-width: 600px;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: black;
+    height: 100%;
+}
+
+button {
+    height: 10vh;
+    width: 10vh;
+    border-radius: 50%;
+    font-size: 4vh;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Arial, sans-serif;
+    padding: 0;
+    margin: 0;
+    line-height: 1;
+    color: white;
+    background-color: #3d3d3d;
+    border: none;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+button:active {
+    background-color: #5a5a5a;
+    transform: scale(0.95);
+}
+
+.calculation {
+    display: flex;
+    justify-content: flex-end;
+    width: 90%;
+    height: 10vh;
+    font-size: 5vh;
+    text-align:right;
+    padding-right: 2vw;
+    padding-bottom: 0.5vh;
+    color: white;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+.row-1, .row-2, .row-3, .row-4, .row-5 {
+    display: flex;
+    flex-direction: row;
+    gap: 1vh;
+    margin-right: 2vw;
+    margin-left: 2vw;
+}
+
+.option {
+    background-color: #626262;
+}
+
+.operator {
+    background-color: rgb(32, 189, 32);
+}
+
+.operator:active {
+    background-color:  rgb(22, 153, 22);
+    transform: scale(0.95);
+}
+
+@media (max-width: 600px) {
+    .container {
+        width: 100%;
+    }
+    .calculation {
+        font-size: 4vh;
+    }
+    button {
+        font-size: 3vh;
+    }
+}
+
