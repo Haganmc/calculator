@@ -10,6 +10,8 @@ const invertButton = document.querySelector('#invert');
 const percent = document.querySelector('#percent');
 const addition = document.querySelector('#addition');
 const subtraction = document.querySelector('#subtract');
+const multiply = document.querySelector('#multiply'); // Added multiply button
+const divide = document.querySelector('#divide'); // Added divide button
 const equals = document.querySelector('#equals');
 
 const maxLength = 50;
@@ -20,15 +22,37 @@ let equalsClicked = false; // Track if equals was clicked
 
 function updateClearButton() {
     if (input.textContent !== "0" && !equalsClicked) {
+        // Keep the back button image
         clearButton.innerHTML = '<img src="delete.svg" alt="Back Arrow" style="filter: invert(100%); height: 60%; width: 60%; object-fit: contain;">';
     } else {
-        clearButton.textContent = "AC";
+        // Set to "AC" when appropriate
+        clearButton.innerHTML = "AC";
+    }
+}
+
+function handleOperatorClick(operator) {
+    if (equalsClicked) {
+        // Start a new equation after equals
+        equation = input.textContent;
+        input.textContent += ` ${operator} `;
+        equation += ` ${operator} `;
+        currentNumber = "";
+        equalsClicked = false; // Reset flag
+    } else if (input.textContent.length < maxLength) {
+        input.textContent += ` ${operator} `;
+        equation += currentNumber + ` ${operator} `;
+        currentNumber = "";
     }
 }
 
 numButtons.forEach(button => {
     button.addEventListener("click", () => {
-        if (input.textContent.length < maxLength) {
+        if (equalsClicked) {
+            input.textContent = button.textContent;
+            equation = "";
+            currentNumber = button.textContent;
+            equalsClicked = false;
+        } else if (input.textContent.length < maxLength) {
             if (input.textContent === "0") {
                 input.textContent = button.textContent;
                 currentNumber = button.textContent;
@@ -36,43 +60,27 @@ numButtons.forEach(button => {
                 input.textContent += button.textContent;
                 currentNumber += button.textContent;
             }
-            updateClearButton();
         }
+        updateClearButton();
     });
 });
 
 decimalButton.addEventListener("click", () => {
     if (input.textContent.length < maxLength && !currentNumber.includes(".")) {
-        // Only add a decimal point if there's a current number to append to
-        if (currentNumber === "") {
-            currentNumber = "0."; // Start a new number with "0."
-            input.textContent += "0."; // Display the new number with "0."
-        } else {
-            currentNumber += ".";
-            input.textContent += ".";
-        }
+        currentNumber += currentNumber === "" ? "0." : ".";
+        input.textContent += currentNumber === "0." ? "0." : ".";
         updateClearButton();
     }
 });
 
-addition.addEventListener("click", () => {
-    if (input.textContent.length < maxLength) {
-        input.textContent += " + ";
-        equation += currentNumber + " + ";
-        currentNumber = "";
-    }
-});
-
-subtraction.addEventListener("click", () => {
-    if (input.textContent.length < maxLength) {
-        input.textContent += " - ";
-        equation += currentNumber + " - ";
-        currentNumber = "";
-    }
-})
+addition.addEventListener("click", () => handleOperatorClick("+"));
+subtraction.addEventListener("click", () => handleOperatorClick("-"));
+multiply.addEventListener("click", () => handleOperatorClick("x"));
+divide.addEventListener("click", () => handleOperatorClick("/"));
+percent.addEventListener("click", () => handleOperatorClick("%"));
 
 equals.addEventListener("click", () => {
-    if (currentNumber !== "") {
+    if (currentNumber !== "" || (equation.includes("%") && currentNumber === "")) {
         equation += currentNumber;
         const result = calculateEquation(equation);
         input.textContent = result.toString();
@@ -110,10 +118,32 @@ clearButton.addEventListener("click", () => {
         updateClearButton();
     } else if (input.textContent.length > 1) {
         // Backspace functionality when equals hasn't been clicked
-        input.textContent = input.textContent.slice(0, -1);
-        input.textContent = formatNumber(input.textContent.replace(/,/g, ''));
+        const textArray = input.textContent.trim().split(" "); // Split input by spaces
+
+        // Check if the last element is an operator
+        if (["+", "-", "x", "/", "%"].includes(textArray[textArray.length - 1])) {
+            // If the last element is an operator, simply remove it
+            textArray.pop();
+            equation = textArray.join(" ");
+            currentNumber = ""; // Reset currentNumber
+        } else {
+            // If the last element is part of the number, handle backspace
+            textArray[textArray.length - 1] = textArray[textArray.length - 1].slice(0, -1);
+            currentNumber = textArray[textArray.length - 1]; // Update currentNumber
+
+            // If the last number is now empty, remove it
+            if (!currentNumber) {
+                textArray.pop();
+            }
+
+            equation = textArray.join(" ");
+        }
+
+        // Update input display
+        input.textContent = equation || "0"; // Default to "0" if input is empty
     } else {
         input.textContent = "0";
+        currentNumber = ""; // Clear currentNumber if input length is 1
         updateClearButton();
     }
 });
@@ -125,23 +155,68 @@ clearButton.addEventListener("touchend", stopClearing); // for touch devices
 
 
 function calculateEquation(eq) {
-    const numbers = eq.split(/(\+|\-)/).map((item, index) => {
-        if (item === "+" || item === "-") {
-            return item;
-        } else {
-            return Number(item);
-        }
-    });
+    // Tokenize the equation and handle numbers and operators
+    const tokens = eq.match(/(-?\d+\.?\d*|\.\d+|[-+x/%()])/g); // Match numbers, decimals, and operators
+    if (tokens[1] === "%" && tokens.length === 2) {
+        let result;
+        result = parseFloat(tokens[0]) / 100; // Handle percentage at the start
+        return result;
+    } else {
+        // Step 2: Handle multiplication, division, and modulus
+        for (let i = 0; i < tokens.length; i++) {
+            if (["x", "/", "%"].includes(tokens[i])) {
+                const prevNumber = parseFloat(tokens[i - 1]);
+                const nextNumber = parseFloat(tokens[i + 1]);
+                let result;
 
-    let result = numbers[0];
-    for (let i = 1; i < numbers.length; i += 2) {
-        const operator = numbers[i];
-        const nextNumber = numbers[i + 1];
-        if (operator === "+") {
-            result += nextNumber;
-        } else if (operator === "-") {
-            result -= nextNumber;
+                if (tokens[i] === "x") {
+                    result = prevNumber * nextNumber;
+                } else if (tokens[i] === "/") {
+                    result = prevNumber / nextNumber;
+                } else if (tokens[i] === "%") {
+                    result = prevNumber % nextNumber; // Calculate modulus
+                }
+                tokens.splice(i - 1, 3, result.toString()); // Replace with the result
+                i -= 1; // Step back for continuity
+            }
         }
+
+        // Step 3: Handle addition and subtraction
+        let result = parseFloat(tokens[0]);
+        for (let i = 1; i < tokens.length; i += 2) {
+            const operator = tokens[i];
+            const nextNumber = parseFloat(tokens[i + 1]);
+            result = operator === "+" ? result + nextNumber : result - nextNumber;
+        }
+
+        return result;
     }
-    return result;
 }
+
+
+
+// negative
+invertButton.addEventListener("click", () => {
+    if (currentNumber === "" && equation !== "") {
+        // If there's no currentNumber but an equation exists, toggle the last number in the equation
+        const tokens = equation.trim().split(" ");
+        const lastNumber = tokens[tokens.length - 1];
+        if (!isNaN(parseFloat(lastNumber))) {
+            tokens[tokens.length - 1] = lastNumber.startsWith("-") 
+                ? lastNumber.slice(1) 
+                : "-" + lastNumber;
+            equation = tokens.join(" ");
+            input.textContent = equation; 
+        }
+    } else if (currentNumber !== "") {
+        // Toggle the sign of the current number
+        currentNumber = currentNumber.startsWith("-") 
+            ? currentNumber.slice(1) 
+            : "-" + currentNumber;
+
+        // Update the displayed input
+        const inputText = input.textContent.trim().split(" "); 
+        inputText[inputText.length - 1] = currentNumber; 
+        input.textContent = inputText.join(" "); 
+    }
+});

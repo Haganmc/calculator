@@ -7,7 +7,7 @@ body {
     align-items: center;
 }
 .container {
-    max-width: 300px;
+    max-width: 400px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -58,6 +58,7 @@ button:active {
     gap: 1vh;
     width: 100%;
     justify-content: space-between;
+
 }
 
 .row-1, .row-2, .row-3, .row-4, .row-5 {
@@ -98,4 +99,9 @@ button#clear img {
     width: 100%;
     object-fit: contain; /* Ensures the image fits nicely within the button */
     display: block; /* Ensures no unwanted inline spacing */
+}
+
+button#advanced:active {
+    background-color: #3d3d3d;
+    transform: none;
 }
