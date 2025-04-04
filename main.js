@@ -222,43 +222,41 @@ invertButton.addEventListener("click", () => {
 });
 
 document.addEventListener("keydown", (event) => {
-    const key = event.key;
+    const key = event.key; // Get the key pressed
 
-    // Handle equals ("Enter" key)
+    // Find the corresponding button using the data-key attribute
+    const button = document.querySelector(`[data-key="${key}"]`);
+
+    if (button) {
+        // Simulate the button click
+        button.click();
+
+        // Update the input display (as if button was clicked)
+        if (button.classList.contains("number")) {
+            // If the key is a number
+            if (input.textContent === "0") {
+                input.textContent = key;
+            } else {
+                input.textContent += key;
+            }
+        } else if (key === ".") {
+            // If the key is a decimal point
+            if (!input.textContent.includes(".")) {
+                input.textContent += key;
+            }
+        } else if (["+","-","*","/","%"].includes(key)) {
+            // If the key is an operator
+            input.textContent += ` ${key} `;
+        }
+    }
+
+    // Handle "Enter" for equals
     if (key === "Enter") {
-        equals.click(); // Simulate clicking the equals button
+        equals.click();
     }
 
-    // Handle percent ("%")
-    if (key === "%") {
-        percent.click(); // Simulate clicking the percent button
-    }
-
-    // Handle other cases (numbers, operators, etc.)
-    if (!isNaN(key)) {
-        const button = document.querySelector(`.number[data-key="${key}"]`);
-        if (button) button.click();
-    }
-
-    if (["+", "-", "*", "/", "."].includes(key)) {
-        const operatorKey = key === "*" ? "x" : key; // Map `*` to `x`
-        const operatorButton = document.querySelector(`#addition[data-key="${operatorKey}"]`) ||
-                               document.querySelector(`#subtract[data-key="${operatorKey}"]`) ||
-                               document.querySelector(`#multiply[data-key="${operatorKey}"]`) ||
-                               document.querySelector(`#divide[data-key="${operatorKey}"]`) ||
-                               document.querySelector(`#percent[data-key="${operatorKey}"]`);
-        if (operatorButton) operatorButton.click();
-    }
-
-    // Handle backspace for clearing last input
+    // Handle "Backspace" for clearing last input
     if (key === "Backspace") {
         clearButton.click();
-    }
-
-    // Handle escape to reset everything
-    if (key === "Escape") {
-        input.textContent = "0";
-        equation = "";
-        currentNumber = "";
     }
 });
