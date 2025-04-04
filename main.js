@@ -220,3 +220,45 @@ invertButton.addEventListener("click", () => {
         input.textContent = inputText.join(" "); 
     }
 });
+
+document.addEventListener("keydown", (event) => {
+    const key = event.key;
+
+    // Handle equals ("Enter" key)
+    if (key === "Enter") {
+        equals.click(); // Simulate clicking the equals button
+    }
+
+    // Handle percent ("%")
+    if (key === "%") {
+        percent.click(); // Simulate clicking the percent button
+    }
+
+    // Handle other cases (numbers, operators, etc.)
+    if (!isNaN(key)) {
+        const button = document.querySelector(`.number[data-key="${key}"]`);
+        if (button) button.click();
+    }
+
+    if (["+", "-", "*", "/", "."].includes(key)) {
+        const operatorKey = key === "*" ? "x" : key; // Map `*` to `x`
+        const operatorButton = document.querySelector(`#addition[data-key="${operatorKey}"]`) ||
+                               document.querySelector(`#subtract[data-key="${operatorKey}"]`) ||
+                               document.querySelector(`#multiply[data-key="${operatorKey}"]`) ||
+                               document.querySelector(`#divide[data-key="${operatorKey}"]`) ||
+                               document.querySelector(`#percent[data-key="${operatorKey}"]`);
+        if (operatorButton) operatorButton.click();
+    }
+
+    // Handle backspace for clearing last input
+    if (key === "Backspace") {
+        clearButton.click();
+    }
+
+    // Handle escape to reset everything
+    if (key === "Escape") {
+        input.textContent = "0";
+        equation = "";
+        currentNumber = "";
+    }
+});
