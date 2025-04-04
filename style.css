@@ -7,8 +7,7 @@ body {
     align-items: center;
 }
 .container {
-    max-width: 600px;
-    width: 90%;
+    max-width: 300px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -44,7 +43,7 @@ button:active {
 .calculation {
     display: flex;
     justify-content: flex-end;
-    width: 90%;
+    width: 100%;
     height: 10vh;
     font-size: 5vh;
     text-align:right;
@@ -57,14 +56,16 @@ button:active {
     display: flex;
     flex-direction: column;
     gap: 1vh;
+    width: 100%;
+    justify-content: space-between;
 }
 
 .row-1, .row-2, .row-3, .row-4, .row-5 {
     display: flex;
     flex-direction: row;
     gap: 1vh;
-    margin-right: 2vw;
-    margin-left: 2vw;
+    justify-content: space-between;
+    width: 100%;
 }
 
 .option {
@@ -92,3 +93,9 @@ button:active {
     }
 }
 
+button#clear img {
+    height: 100%;
+    width: 100%;
+    object-fit: contain; /* Ensures the image fits nicely within the button */
+    display: block; /* Ensures no unwanted inline spacing */
+}

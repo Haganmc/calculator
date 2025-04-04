@@ -16,6 +16,15 @@ const maxLength = 50;
 let equation = "";
 let currentNumber = "";
 let clearTimeoutId;
+let equalsClicked = false; // Track if equals was clicked
+
+function updateClearButton() {
+    if (input.textContent !== "0" && !equalsClicked) {
+        clearButton.innerHTML = '<img src="delete.svg" alt="Back Arrow" style="filter: invert(100%); height: 60%; width: 60%; object-fit: contain;">';
+    } else {
+        clearButton.textContent = "AC";
+    }
+}
 
 numButtons.forEach(button => {
     button.addEventListener("click", () => {
@@ -27,14 +36,22 @@ numButtons.forEach(button => {
                 input.textContent += button.textContent;
                 currentNumber += button.textContent;
             }
+            updateClearButton();
         }
     });
 });
 
 decimalButton.addEventListener("click", () => {
-    if (input.textContent.length < maxLength && !input.textContent.includes(".")) {
-            input.textContent += ".";
+    if (input.textContent.length < maxLength && !currentNumber.includes(".")) {
+        // Only add a decimal point if there's a current number to append to
+        if (currentNumber === "") {
+            currentNumber = "0."; // Start a new number with "0."
+            input.textContent += "0."; // Display the new number with "0."
+        } else {
             currentNumber += ".";
+            input.textContent += ".";
+        }
+        updateClearButton();
     }
 });
 
@@ -61,31 +78,51 @@ equals.addEventListener("click", () => {
         input.textContent = result.toString();
         equation = result.toString();
         currentNumber = "";
+        equalsClicked = true; // Set flag to true
+        updateClearButton();
     }
 });
 
+
+function clearInput() {
+    input.textContent = "0";
+}
+
+function startClearing () {
+    clearTimeoutId = setTimeout(clearInput, 500);    
+}
+
+function stopClearing () {
+    clearTimeout(clearTimeoutId);
+}
+
+function formatNumber(num) {
+    return num.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
 
 clearButton.addEventListener("click", () => {
-    if (input.textContent.length > 1){
+    if (equalsClicked) {
+        // If equals was clicked, clear the input entirely
+        input.textContent = "0";
+        equation = "";
+        currentNumber = "";
+        equalsClicked = false; // Reset flag
+        updateClearButton();
+    } else if (input.textContent.length > 1) {
+        // Backspace functionality when equals hasn't been clicked
         input.textContent = input.textContent.slice(0, -1);
-        input.textContent = formatNumber(input.textContent.replace(/,/g,''));
-
+        input.textContent = formatNumber(input.textContent.replace(/,/g, ''));
     } else {
         input.textContent = "0";
-        clearButton.textContent = "AC";
+        updateClearButton();
     }
 });
 
-clearButton.addEventListener("mousedown", () => {
-    clearTimeoutId = setTimeout(() => {
-        input.textContent = "0";
-        clearButton.textContent = "AC";
-    }, 500)
-});
+clearButton.addEventListener("mousedown", startClearing);
+clearButton.addEventListener("mouseup", stopClearing);
+clearButton.addEventListener("touchstart", startClearing); // for touch devices
+clearButton.addEventListener("touchend", stopClearing); // for touch devices
 
-clearButton.addEventListener("mouseup", () => {
-    clearTimeout(clearTimeoutId);
-})
 
 function calculateEquation(eq) {
     const numbers = eq.split(/(\+|\-)/).map((item, index) => {
